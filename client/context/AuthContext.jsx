@@ -1,7 +1,7 @@
 // used to store func or state var for the whole site
 
 import { createContext, useEffect, useState } from "react";
-import { axios } from 'axios';
+import axios  from 'axios';
 import toast from "react-hot-toast";
 import {io} from "socket.io-client";
 
@@ -27,9 +27,61 @@ export const AuthProvider = ({ children }) => {
             if(data.success)
             {
                 setAuthUser(data.user);
+                connectSocket(data.user);
             }
         } catch (error) {
             toast.error(error.message);
+        }
+    }
+
+    // login func to handle user authentication and socket conn
+
+    const login = async (state, credentials) => {
+        try {
+            const { data } = await axios.post(`/api/auth/${state}`, credentials);
+            if(data.success)
+            {
+                setAuthUser(data.userData);
+                connectSocket(data.userData);
+                axios.defaults.headers.common["token"] = data.token;
+                setToken(data.token);
+                localStorage.setItem("token", data.token);
+                toast.success(data.message);
+            }
+            else{
+                toast.error(data.message);
+
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
+
+
+    // logout func to handle user logout and socket disconnection
+
+    const logout = async () => {
+        localStorage.removeItem("token");
+        setToken(null);
+        setAuthUser(null);
+        setOnlineUsers([]);
+        axios.defaults.headers.common["token"] = null;
+        toast.success("Logged Out Successfully");
+        socket.disconnect();
+    }
+
+    // update profile func to handle user progfile updates
+
+    const updateProfile = async (body) => {
+        try {
+            const {data} = await axios.put("/api/auth/update-profile", body);
+            if(data.success){
+                setAuthUser(data.userData);
+                toast.success("Profile Updated Successfully");
+            }
+        } catch (error) {
+            toast.error(error.meesage);
+            
         }
     }
 
@@ -63,7 +115,10 @@ export const AuthProvider = ({ children }) => {
         axios,
         authUser,
         onlineUsers,
-        socket
+        socket,
+        login,
+        logout,
+        updateProfile
     }
     return (
         <AuthContext.Provider value={value}>
