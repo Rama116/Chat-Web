@@ -26,7 +26,6 @@ export const ProfilePage = () => {
       reader.readAsDataURL(selectedImg);
       reader.onload = async () => {
         const base64Image = reader.result;
-        console.log(base64Image);
         await updateProfile({profilePic: base64Image, fullName: name, bio});
         navigate('/');
       }
@@ -44,9 +43,9 @@ export const ProfilePage = () => {
               <label htmlFor="avatar" className='flex items-center gap-3 cursor-pointer'>
                   <input onChange={(e) => setSelectedImg(e.target.files[0])}
                    type="file" id="avatar" accept='.png, .jpg, .jpeg' hidden />
-                  <img src={selectedImg ? URL.createObjectURL(selectedImg) : 
+                  <img src={selectedImg ? URL.createObjectURL(selectedImg) : authUser?.profilePic ||
                     assets.avatar_icon
-                  } alt="" className={`w-12 h-12 ${selectedImg && 'rounded-full'}`} />
+                  } alt="" className={`w-12 h-12 ${authUser?.profilePic && 'rounded-full'}`} />
                   Upload Profile Image
               </label>
 

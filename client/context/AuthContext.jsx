@@ -80,8 +80,7 @@ export const AuthProvider = ({ children }) => {
                 toast.success("Profile Updated Successfully");
             }
         } catch (error) {
-            toast.error(error.message);
-            
+            toast.error(error.message);    
         }
     }
 
