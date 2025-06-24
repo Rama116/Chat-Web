@@ -16,6 +16,7 @@ const ChatContainer = () => {
 
   const [input, setInput] = useState('');
   const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -48,6 +49,16 @@ const ChatContainer = () => {
     if (chatArea) {
       const isAtBottom = chatArea.scrollHeight - chatArea.scrollTop <= chatArea.clientHeight + 5;
       setIsUserScrolling(!isAtBottom);
+      setShowScrollButton(!isAtBottom); // Show button when not at bottom
+    }
+  };
+
+  // Function to scroll to bottom when arrow is clicked
+  const scrollToBottom = () => {
+    if (scrollEnd.current) {
+      scrollEnd.current.scrollIntoView({ behavior: "smooth" });
+      setIsUserScrolling(false);
+      setShowScrollButton(false);
     }
   };
 
@@ -69,6 +80,7 @@ const ChatContainer = () => {
       if (isNearBottom) {
         scrollEnd.current.scrollIntoView({ behavior: "smooth" });
         setIsUserScrolling(false); // Reset user scrolling state after auto-scroll
+        setShowScrollButton(false); // Hide button when at bottom
       }
     }
   }, [messages, isUserScrolling]);
@@ -117,6 +129,31 @@ const ChatContainer = () => {
         ))}
         <div ref={scrollEnd} className=''></div>
       </div>
+
+      {/* Scroll to bottom button */}
+      {showScrollButton && (
+        <button
+          onClick={scrollToBottom}
+          className='absolute bottom-16 right-4 bg-violet-500 hover:bg-violet-600 
+                     text-white rounded-full p-2 shadow-lg transition-all duration-200 
+                     hover:scale-110 z-10'
+          aria-label="Scroll to bottom"
+        >
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M7 13l5 5 5-5"/>
+            <path d="M7 6l5 5 5-5"/>
+          </svg>
+        </button>
+      )}
 
       {/* --bottom area-- */}
       <div className='absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3'>
