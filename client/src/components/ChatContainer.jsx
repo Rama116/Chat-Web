@@ -46,14 +46,14 @@ const ChatContainer = () => {
     if (selectedUser) {
       getMessages(selectedUser._id)
     }
-  }, [selectedUser])
+  }, [selectedUser,messages])
 
   useEffect(() => {
     if (scrollEnd.current && messages) {
       scrollEnd.current.scrollIntoView({ behaviour: "smooth" })
     }
   }, [messages])
-
+  console.log(messages)
   return selectedUser ? (
     <div className='h-full overflow-scroll relative backdrop-blur-lg'>
       {/*---header---*/}
