@@ -6,15 +6,16 @@ import { AuthContext } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const ChatContainer = () => {
-
   const { messages, selectedUser, setSelectedUser,
     sendMessage, getMessages } = useContext(ChatContext);
 
   const { authUser, onlineUsers } = useContext(AuthContext);
 
-  const scrollEnd = useRef()
+  const chatAreaRef = useRef(null); // Ref for the scrollable chat area
+  const scrollEnd = useRef(null); // Ref for the very bottom of the chat
 
   const [input, setInput] = useState('');
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -25,7 +26,6 @@ const ChatContainer = () => {
   }
 
   // handle sending image
-
   const handleSendImage = async (e) => {
     const file = e.target.files[0];
     if (!file || !file.type.startsWith("image/")) {
@@ -42,22 +42,40 @@ const ChatContainer = () => {
     reader.readAsDataURL(file);
   }
 
+  // Handle user scroll events
+  const handleUserScroll = () => {
+    const chatArea = chatAreaRef.current;
+    if (chatArea) {
+      const isAtBottom = chatArea.scrollHeight - chatArea.scrollTop <= chatArea.clientHeight + 5;
+      setIsUserScrolling(!isAtBottom);
+    }
+  };
+
+  // Effect to fetch messages when selectedUser changes
   useEffect(() => {
     if (selectedUser) {
-      getMessages(selectedUser._id)
+      getMessages(selectedUser._id);
     }
-  }, [selectedUser])
+  }, [selectedUser, getMessages]);
 
+  // Effect to manage scrolling with dynamic threshold
   useEffect(() => {
-    if (scrollEnd.current && messages) {
-      scrollEnd.current.scrollIntoView({ behaviour: "smooth" })
+    const chatArea = chatAreaRef.current;
+    if (chatArea && scrollEnd.current) {
+      // Dynamic threshold: 0 for user scrolling, 65 for auto-scroll
+      const threshold = isUserScrolling ? 0 : 65;
+      const isNearBottom = chatArea.scrollHeight - chatArea.scrollTop <= chatArea.clientHeight + threshold;
+
+      if (isNearBottom) {
+        scrollEnd.current.scrollIntoView({ behavior: "smooth" });
+        setIsUserScrolling(false); // Reset user scrolling state after auto-scroll
+      }
     }
-  }, [messages])
-  console.log(messages)
+  }, [messages, isUserScrolling]);
+
   return selectedUser ? (
     <div className='h-full overflow-scroll relative backdrop-blur-lg'>
       {/*---header---*/}
-
       <div className='flex items-center gap-3 py-3 mx-4 border-b
         border-stone-500'>
         <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className='w-8 rounded-full' />
@@ -72,18 +90,20 @@ const ChatContainer = () => {
       </div>
 
       {/*--chat area--- */}
-      <div className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3
-        pb-6'>
+      <div 
+        ref={chatAreaRef} 
+        onScroll={handleUserScroll}
+        className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6'
+      >
         {messages.map((msg, index) => (
-          <div key={index} className={`flex items-end gap-2 justify-end 
-              ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}>
+          <div key={index} className={`flex items-end gap-2 ${msg.senderId === authUser._id ? 'justify-end' : ''}`}>
             {msg.image ? (
               <img src={msg.image} alt="" className='max-w-[230px]
-                    border border-gray-700 rounded-lg overflow-hidden mb-8'/>
+                        border border-gray-700 rounded-lg overflow-hidden mb-8'/>
             ) : (
               <p className={`pb-2 flex justify-center items-center w-[90px] md:text-sm font-light
-                        rounded-lg mb-8 break-all bg-violet-500/30 text-white 
-                        ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>
+                            rounded-lg mb-8 break-all bg-violet-500/30 text-white 
+                            ${msg.senderId === authUser._id ? 'rounded-br-none' : 'rounded-bl-none'}`}>
                 {msg.text}</p>
             )}
 
@@ -95,25 +115,22 @@ const ChatContainer = () => {
             </div>
           </div>
         ))}
-        <div ref={scrollEnd} className=''>
-
-        </div>
+        <div ref={scrollEnd} className=''></div>
       </div>
 
       {/* --bottom area-- */}
-
       <div className='absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3'>
         <div className='flex-1 flex items-center bg-gray-100/12 px-3 rounded-full'>
           <input onChange={(e) => setInput(e.target.value)} value={input}
             onKeyDown={(e) => e.key === "Enter" ? handleSendMessage(e) : null}
             type="text" placeholder='Send a Message'
             className='flex-1 text-sm p-3 border-none rounded-lg
-                outline-none text-white placeholder-gray-400'/>
+                    outline-none text-white placeholder-gray-400'/>
           <input onChange={handleSendImage}
             type="file" id="image" accept='image/png, image/jpg' hidden />
           <label htmlFor="image">
             <img src={assets.gallery_icon} alt="" className='w-5 mr-2
-                  cursor-pointer'/>
+                        cursor-pointer'/>
           </label>
         </div>
         <img onClick={handleSendMessage}
