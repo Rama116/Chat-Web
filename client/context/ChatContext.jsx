@@ -60,7 +60,7 @@ export const ChatProvider = ({ children }) => {
     const subscribeToMessages = async () => {
         if(!socket) return;
 
-        socket.on("newMessage", (newMessage) => {
+        socket.on("new Message", (newMessage) => {
             if(selectedUser && newMessage.senderId === selectedUser._id) {
                 newMessage.seen = true;
                 setMessages((prevMessages) => [...prevMessages, newMessage]);

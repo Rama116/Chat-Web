@@ -1,13 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import SideBar from './../components/SideBar';
 import RightSideBar from './../components/RightSideBar';
 import ChatContainer from './../components/ChatContainer';
-import { useState } from 'react';
+import { ChatContext } from '../../context/ChatContext';
 
 export const HomePage = () => {
 
-  const [selectedUser, setSelectedUser] = useState(false)
-
+  const {selectedUser} = useContext(ChatContext)
+ 
   return (
     <div className='border w-full h-screen sm:px-[15%] sm:py-[5%]'>
        <div className={`backdrop-blur-xl border-2 border-gray-600 rounded-2xl
