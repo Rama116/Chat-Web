@@ -48,14 +48,9 @@ const ChatContainer = () => {
   useEffect(() => {
     if (selectedUser) getMessages(selectedUser._id);
     // eslint-disable-next-line
-  }, [selectedUser]);
+  }, [selectedUser,messages]);
 
-  // Auto-scroll to bottom when messages update
-  useEffect(() => {
-    if (scrollEnd.current) {
-      scrollEnd.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+  
 
   // Show scroll button when not near bottom
   useEffect(() => {
