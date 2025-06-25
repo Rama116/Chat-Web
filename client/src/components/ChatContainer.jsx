@@ -23,7 +23,7 @@ const ChatContainer = () => {
 
   // Send message handler
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (input.trim() === '') return;
     await sendMessage({ text: input.trim() });
     setInput('');
@@ -36,7 +36,6 @@ const ChatContainer = () => {
       toast.error('Select an image file');
       return;
     }
-
     const reader = new FileReader();
     reader.onloadend = async () => {
       await sendMessage({ image: reader.result });
@@ -48,14 +47,20 @@ const ChatContainer = () => {
   // Fetch messages on selected user change
   useEffect(() => {
     if (selectedUser) getMessages(selectedUser._id);
-  }, [selectedUser,messages]);
+    // eslint-disable-next-line
+  }, [selectedUser]);
 
   // Auto-scroll to bottom when messages update
-
+  useEffect(() => {
+    if (scrollEnd.current) {
+      scrollEnd.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   // Show scroll button when not near bottom
   useEffect(() => {
     const chatArea = chatAreaRef.current;
+    if (!chatArea) return;
     const handleScroll = () => {
       const threshold = 200;
       const isNearBottom =
@@ -202,3 +207,4 @@ const ChatContainer = () => {
 };
 
 export default ChatContainer;
+
