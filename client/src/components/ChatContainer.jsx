@@ -101,7 +101,7 @@ const ChatContainer = () => {
       {/* Chat area */}
       <div
         ref={chatAreaRef}
-        className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-4 pb-6 bg-slate-900/50"
+        className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-4 pb-12 bg-slate-900/50"
       >
         {messages.map((msg, index) => (
           <div
